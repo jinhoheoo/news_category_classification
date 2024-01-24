@@ -68,9 +68,18 @@ for i in range(6):
     df_section_titles = pd.DataFrame(titles, columns = ['titles'])  #titles가지고 데이터프레임만듬
     df_section_titles['category'] = category[i] #카테고리라는 항목을 추가함.
     df_titles = pd.concat([df_titles,df_section_titles], axis='rows', ignore_index=True)
+    #pd.concat(): pandas에서 제공하는 DataFrame을 합치는 함수입니다.
+    #[df_titles, df_section_titles]: 합쳐질 DataFrame들을 리스트로 전달합니다. 여기서는 df_titles와 df_section_titles가 두 개의 DataFrame으로 전달되었습니다.
+    #axis='rows': 합치는 방향을 지정합니다. 'rows'는 행 방향으로 합침을 의미합니다. 수평으로 합치려면 'columns'을 사용할 수 있습니다.
+    #ignore_index=True: 인덱스를 무시하고 새롭게 인덱스를 부여합니다. 이 옵션을 사용하면 새롭게 합쳐진 DataFrame의 인덱스가 0부터 시작하게 됩니다.
 
 print(df_titles.head())
 df_titles.info()
 print(df_titles['category'].value_counts())
 df_titles.to_csv('./crawling_data/naver_headline_new_{}.csv'.format(datetime.datetime.now().strftime('%Y%m%d')),index=False)
+#to_csv(): DataFrame을 CSV 파일로 저장하는 pandas의 메서드입니다.
+#'./crawling_data/naver_headline_new_{}.csv'.format(datetime.datetime.now().strftime('%Y%m%d')):
+# 저장될 CSV 파일의 경로와 파일 이름을 지정합니다. 여기서 {}에는 현재 날짜를 넣기 위해 datetime.datetime.now().strftime('%Y%m%d')를 사용하고 있습니다.
+# 예를 들어, 파일 이름이 "naver_headline_new_20220123.csv"와 같이 날짜가 포함됩니다.
+#index=False: CSV 파일에 DataFrame의 인덱스를 저장하지 않도록 설정합니다. CSV 파일에 인덱스가 저장되면 파일을 다시 읽을 때 추가적인 열로 인식됩니다.
 

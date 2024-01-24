@@ -65,4 +65,5 @@ for l in range(6):
             df_section_title.to_csv('./crawling_data/data_{}_{}.csv'.format(l, k))
 
 
+
 #df_titles = pd.concat([df_titles, df_section_title],axis='rows',ignore_index=True)
