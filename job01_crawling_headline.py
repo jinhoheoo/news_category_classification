@@ -1,5 +1,6 @@
 #헤드라인 크롤링하려함.
 #크롤링(스크라이핑)(데이터 긁어온다고 보면됨) 하는법
+#뷰티풀숲이용해서 클래스를 가지고 타이틀을 가지고 온거임
 
 from bs4 import BeautifulSoup  #크롤링 할 때 필요함.    #pip install bs4
 import requests # 라이브러리를 현재의 파이썬 스크립트 또는 프로젝트에 가져옵니다. 이 라이브러리는 HTTP 요청을 보내고 받는 데 사용됩니다.
@@ -52,22 +53,27 @@ category = ['Politics', 'Economic', 'Social', 'Culture', 'World', 'IT']
     #replace는 특정 문자를 찾아서 바꾸는거고 re는 특정문자를 찾는거고 거기에 sub를 붙여서 찾은거를 빼는거임.
 ##print(titles)
 
-df_titles = pd.DataFrame()
-re_title = re.compile('[^가-힣|a-z|A-Z]')
-headers = {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+df_titles = pd.DataFrame()  #데이터프레임 형태 만들어서 타이틀이랑 카테고리 넣으려함.
+re_title = re.compile('[^가-힣|a-z|A-Z]') #텍스트 가져올때 가져오려고하는부분만 가져올려고
+headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
 #이렇게 headers 이런식으로 하면 웹브라우저에서 요청한줄알고 크롤링을 웹페이지에서 막지않음. 트래픽관리한다고 크롤링 막아놓는경우가 있어서 이렇게함.
 
 for i in range(6):
-    url = 'https://news.naver.com/main/main.naver?mode=LSD&mid=shm&sid1=10{}'.format(i)
-    resp = requests.get(url)
-    soup = BeautifulSoup(resp.text, 'html.parser')
-    title_tags = soup.select('.sh_text_headline')
+    url = 'https://news.naver.com/main/main.naver?mode=LSD&mid=shm&sid1=10{}'.format(i) #이렇게 url저장
+    resp = requests.get(url, headers = headers)     #이렇게해서 url에 맞는 브라우저 가져오려고
+    # 이 부분에서는 requests 라이브러리를 사용하여 위에서 생성한 URL에 HTTP GET 요청을 보냅니다. headers 매개변수를 사용하여 요청에 헤더 정보를 추가할 수 있습니다.
+    # 이 경우, 브라우저처럼 보이도록 하는 헤더가 headers 변수에 저장되어 있을 것입니다.
+    soup = BeautifulSoup(resp.text, 'html.parser')  #이걸로 브라우저 킴
+    #라이브러리를 사용하여 HTML 문서를 파싱합니다. resp.text는 HTTP 응답에서 얻은 HTML 문서의 텍스트 내용을 나타냅니다.
+    # 'html.parser'는 BeautifulSoup에서 사용할 파서의 종류를 지정합니다.
+    title_tags = soup.select('.sh_text_headline')   #클래스 이용해서 원하는 텍스트 부분만 가져옴.
     titles = []
     for title_tag in title_tags:
-        titles.append(re.compile('[^가-힣|a-z|A-Z]').sub('', title_tag.text))
-    df_section_titles = pd.DataFrame(titles, columns = ['titles'])  #titles가지고 데이터프레임만듬
-    df_section_titles['category'] = category[i] #카테고리라는 항목을 추가함.
-    df_titles = pd.concat([df_titles,df_section_titles], axis='rows', ignore_index=True)
+        titles.append(re_title.sub(' ', title_tag.text))    #타이틀가져올때 필요없는부분없앰
+    df_section_titles = pd.DataFrame(titles, columns=['titles'])
+    df_section_titles['category'] = category[i] #카테고리 열을 추가해줌
+    df_titles = pd.concat([df_titles, df_section_titles], axis='rows',
+                          ignore_index=True) #concat해서 타이틀열과 카테고리열을 합친 df_titles를 만들어줌
     #pd.concat(): pandas에서 제공하는 DataFrame을 합치는 함수입니다.
     #[df_titles, df_section_titles]: 합쳐질 DataFrame들을 리스트로 전달합니다. 여기서는 df_titles와 df_section_titles가 두 개의 DataFrame으로 전달되었습니다.
     #axis='rows': 합치는 방향을 지정합니다. 'rows'는 행 방향으로 합침을 의미합니다. 수평으로 합치려면 'columns'을 사용할 수 있습니다.
@@ -76,10 +82,10 @@ for i in range(6):
 print(df_titles.head())
 df_titles.info()
 print(df_titles['category'].value_counts())
-df_titles.to_csv('./crawling_data/naver_headline_new_{}.csv'.format(datetime.datetime.now().strftime('%Y%m%d')),index=False)
+df_titles.to_csv('./crawling_data/naver_headline_news_{}.csv'.format(
+    datetime.datetime.now().strftime('%Y%m%d')), index= False)
 #to_csv(): DataFrame을 CSV 파일로 저장하는 pandas의 메서드입니다.
 #'./crawling_data/naver_headline_new_{}.csv'.format(datetime.datetime.now().strftime('%Y%m%d')):
 # 저장될 CSV 파일의 경로와 파일 이름을 지정합니다. 여기서 {}에는 현재 날짜를 넣기 위해 datetime.datetime.now().strftime('%Y%m%d')를 사용하고 있습니다.
 # 예를 들어, 파일 이름이 "naver_headline_new_20220123.csv"와 같이 날짜가 포함됩니다.
 #index=False: CSV 파일에 DataFrame의 인덱스를 저장하지 않도록 설정합니다. CSV 파일에 인덱스가 저장되면 파일을 다시 읽을 때 추가적인 열로 인식됩니다.
-

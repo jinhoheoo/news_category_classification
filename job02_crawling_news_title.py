@@ -1,5 +1,7 @@
 #네이버의 경우 job01처럼 request로 크롤링하면 되지만 대부분의 다른페이지들의 경우 주소체계가 뒤죽박죽인 경우가 많아 for을 돌리는게 힘듬
 #이번에는 브라우저로 접근해서 하나하나 클릭해서 현재보이는 페이지에서 긁어오려함.
+# 셀레니움을 이용해서 xpath를 통해 타이틀을 읽어옴
+#여기꺼 이해안되면 movie버전도 셀레니움으로 자세하게 했으니 그거 보면됨.
 
 from selenium import webdriver  #pip install selenium
 from selenium.webdriver.chrome.service import Service as ChromeService
@@ -37,8 +39,8 @@ for l in range(6):
         url = section_url + '#&date=%2000:00:00&page={}'.format(k)
         #https://news.naver.com/main/main.naver?mode=LSD&mid=shm&sid1=100#&date=%2000:00:00&page=1 이거 의미함
         try:        #주소가 없다든가 할때 오류생길수있으니 그거 방지하려고
-            driver.get(url)
-            time.sleep(0.5)
+            driver.get(url)     #이걸로 브라우저 킴
+            time.sleep(0.5)     #브라우저 로드되기를 0.5초간 기다림
         except:
             print('driver.get', l, k)   #driver.get에서 오류발생했고 어느 카테고리의 어느 페이지에서 문제 발생했는지를 표현한거임.
 
@@ -63,7 +65,8 @@ for l in range(6):
             df_section_title = pd.DataFrame(titles, columns=['titles'])
             df_section_title['category'] = category[l]
             df_section_title.to_csv('./crawling_data/data_{}_{}.csv'.format(l, k))
-
+            titles=[]
+driver.close()
 
 
 #df_titles = pd.concat([df_titles, df_section_title],axis='rows',ignore_index=True)
